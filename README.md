@@ -19,7 +19,7 @@ TV Nostalgia DZ est une expérience nostalgique interactive qui recrée l'ambian
 - **Filtrage intelligent** par catégories et années
 - **Contenu adapté** à votre époque (early 90s, mid 90s, late 90s)
 
-### 🎬 **6 Catégories Nostalgiques**
+### 🎬 **5 Catégories Nostalgiques**
 - **🎭 Comédie** : Nass Mlah City, Djamaa Family, sketches
 - **🎨 Dessins Animés** : Spacetoon, MBC3, anime en arabe
 - **⚽ Sports** : Équipe nationale, football algérien
@@ -43,7 +43,7 @@ TV Nostalgia DZ est une expérience nostalgique interactive qui recrée l'ambian
 git clone https://github.com/filinodz/nostalgiatvdz.git
 
 # Aller dans le dossier
-cd tv-nostalgia-dz
+cd nostalgiatvdz
 
 # Lancer un serveur local (Python)
 python -m http.server 8000
@@ -58,7 +58,7 @@ http://localhost:8000
 ## 📁 Structure du Projet
 
 ```
-tv-nostalgia-dz/
+nostalgiatvdz/
 ├── index.html              # Page principale
 ├── img/
 │   ├── logo.png            # Logo du site
@@ -99,7 +99,7 @@ const VIDEO_DATABASE = {
 
 1. **Ajouter dans CATEGORIES** :
 ```javascript
-const CATEGORIES = ["Comedie", "DessinAnime", "Sports", "News", "Histoire", "Musique", "NouvelleCat"];
+const CATEGORIES = ["Comedie", "DessinAnime", "Sports", "News", "Histoire", "NouvelleCat"];
 ```
 
 2. **Ajouter dans VIDEO_DATABASE** :
