@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TV Nostalgia DZ — Lecteur YouTube Rétro</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --tv-width: clamp(560px, 58vw, 980px);
+    --screen-x: 12.6%;
+    --screen-y: 8%;
+    --screen-w: 74.8%;
+    --screen-h: 61.5%;
+    --primary: #00e6cc;
+    --primary-glow: #00ffdd;
+    --secondary: #ff4757;
+    --accent: #7b68ee;
+    --gold: #ffd700;
+    --sidebar-w: 340px;
+    --bg-dark: #0a0d14;
+    --bg-card: rgba(15, 20, 28, 0.9);
+    --border-primary: rgba(0, 230, 204, 0.3);
+    --text-primary: #ffffff;
+    --text-secondary: #a0aec0;
+  }
+
+  * { box-sizing: border-box; }
+  
+  html, body { 
+    height: 100%; 
+    margin: 0; 
+    color: var(--text-primary);
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(123, 104, 238, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 71, 87, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(0, 230, 204, 0.1) 0%, transparent 50%),
+      linear-gradient(135deg, #0a0d14 0%, #1a1d29 100%);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Animated background particles */
+  body::before, body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.15) 0 70%, transparent 71%),
+      radial-gradient(2px 2px at 80% 60%, rgba(0, 230, 204, .12) 0 70%, transparent 71%),
+      radial-gradient(2px 2px at 60% 20%, rgba(255, 71, 87, .1) 0 70%, transparent 71%),
+      radial-gradient(1px 1px at 90% 70%, rgba(123, 104, 238, .18) 0 70%, transparent 71%);
+    background-repeat: no-repeat;
+    filter: blur(.3px);
+    z-index: 0;
+  }
+  
+  body::after { 
+    animation: starDrift 45s linear infinite; 
+    opacity: .4; 
+  }
+  
+  @keyframes starDrift { 
+    0% { transform: translateY(0) rotate(0deg); } 
+    100% { transform: translateY(-20px) rotate(1deg); } 
+  }
+
+  /* Header simplifié et compact */
+  header { 
+    position: relative; 
+    z-index: 10; 
+    padding: 15px 20px 10px; 
+    text-align: center; 
+    overflow: hidden;
+    background: linear-gradient(135deg, 
+      rgba(0, 230, 204, 0.06) 0%, 
+      rgba(123, 104, 238, 0.06) 50%,
+      rgba(255, 71, 87, 0.06) 100%);
+    border-bottom: 1px solid var(--border-primary);
+    backdrop-filter: blur(25px);
+  }
+
+  /* Container pour le logo - plus compact */
+  .logo-container {
+    position: relative;
+    display: inline-block;
+    margin: 0;
+  }
+
+  /* Logo PNG avec animations - plus petit */
+  .logo {
+    height: clamp(50px, 8vw, 120px);
+    width: auto;
+    filter: drop-shadow(0 0 15px rgba(0, 230, 204, 0.4));
+    animation: logoFloat 6s ease-in-out infinite, logoGlow 4s ease-in-out infinite alternate;
+    transition: all 0.3s ease;
+  }
+
+  .logo:hover {
+    transform: scale(1.1) rotate(3deg);
+    filter: drop-shadow(0 0 25px rgba(0, 230, 204, 0.8));
+  }
+
+  @keyframes logoFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-5px) rotate(1deg); }
+    50% { transform: translateY(-8px) rotate(0deg); }
+    75% { transform: translateY(-3px) rotate(-1deg); }
+  }
+
+  @keyframes logoGlow {
+    0% { filter: drop-shadow(0 0 15px rgba(0, 230, 204, 0.4)); }
+    100% { filter: drop-shadow(0 0 25px rgba(0, 230, 204, 0.7)); }
+  }
+
+  /* Effet de particules autour du logo - plus petit */
+  .logo-container::before,
+  .logo-container::after {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 50%;
+    animation: particles 8s linear infinite;
+  }
+
+  .logo-container::before {
+    top: 15%;
+    left: 8%;
+    animation-delay: 0s;
+  }
+
+  .logo-container::after {
+    top: 75%;
+    right: 12%;
+    animation-delay: 4s;
+    background: var(--accent);
+  }
+
+  @keyframes particles {
+    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+    25% { opacity: 1; transform: scale(1) rotate(90deg); }
+    50% { opacity: 0.7; transform: scale(1.2) rotate(180deg); }
+    75% { opacity: 1; transform: scale(0.8) rotate(270deg); }
+  }
+
+  @keyframes gradientShift { 
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes gradientShift { 
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Layout principal optimisé */
+  .main {
+    position: relative; 
+    z-index: 5;
+    display: grid; 
+    grid-template-columns: minmax(280px, var(--sidebar-w)) 1fr;
+    gap: 20px; 
+    align-items: start; 
+    padding: 20px; 
+    max-width: 1800px; 
+    margin: 0 auto;
+  }
+  /* Sidebar compacte avec glassmorphism avancé */
+  .sidebar {
+    position: sticky; 
+    top: 15px; 
+    width: 100%;
+    background: linear-gradient(145deg, 
+      rgba(15, 20, 28, 0.95), 
+      rgba(25, 30, 40, 0.90),
+      rgba(35, 40, 50, 0.85));
+    border: 1px solid var(--border-primary);
+    border-radius: 20px; 
+    padding: 24px;
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+    backdrop-filter: blur(25px);
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, .7), 
+      inset 0 1px 0 rgba(255, 255, 255, .15),
+      0 0 0 1px rgba(0, 230, 204, .15),
+      0 0 50px rgba(0, 230, 204, .08);
+    animation: slideInLeft .8s ease both;
+    overflow: auto; 
+    max-height: calc(100vh - 140px);
+    position: relative;
+  }
+
+  /* Effet de brillance sur la sidebar */
+  .sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      transparent 100%);
+    animation: sidebarShine 8s ease-in-out infinite;
+    border-radius: 24px;
+    pointer-events: none;
+  }
+
+  @keyframes sidebarShine {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: -100%; }
+  }
+
+  /* Amélioration des catégories avec micro-interactions */
+  .category {
+    display: flex; 
+    align-items: center; 
+    gap: 14px; 
+    font-size: .95rem; 
+    cursor: pointer;
+    padding: 16px 18px; 
+    border-radius: 16px;
+    background: linear-gradient(145deg, 
+      rgba(255,255,255,.08), 
+      rgba(255,255,255,.03));
+    border: 1px solid rgba(255,255,255,.12);
+    transition: all .4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(0, 230, 204, .15), 
+      transparent);
+    transition: left .6s ease;
+  }
+
+  .category:hover {
+    transform: translateY(-3px); 
+    box-shadow: 
+      0 12px 30px rgba(0, 230, 204, .2),
+      0 0 0 1px rgba(0, 230, 204, .3); 
+    border-color: var(--primary);
+    background: linear-gradient(145deg, 
+      rgba(0, 230, 204, .12), 
+      rgba(123, 104, 238, .08));
+  }
+
+  .category:hover::before {
+    left: 100%;
+  }
+
+  .category:active {
+    transform: translateY(-1px);
+  }
+
+  /* Layout principal amélioré */
+  .main {
+    position: relative; 
+    z-index: 5;
+    display: grid; 
+    grid-template-columns: minmax(280px, var(--sidebar-w)) 1fr;
+    gap: 24px; 
+    align-items: start; 
+    padding: 24px; 
+    max-width: 1800px; 
+    margin: 0 auto;
+  }
+
+  /* Sidebar avec glassmorphism */
+  .sidebar {
+    position: sticky; 
+    top: 20px; 
+    width: 100%;
+    background: linear-gradient(145deg, 
+      rgba(15, 20, 28, 0.95), 
+      rgba(25, 30, 40, 0.85));
+    border: 1px solid var(--border-primary);
+    border-radius: 20px; 
+    padding: 24px;
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+    backdrop-filter: blur(20px);
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, .6), 
+      inset 0 1px 0 rgba(255, 255, 255, .1),
+      0 0 0 1px rgba(0, 230, 204, .1);
+    animation: slideInLeft .8s ease both;
+    overflow: auto; 
+    max-height: calc(100vh - 120px);
+  }
+
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); } 
+    to { opacity: 1; transform: none; }
+  }
+
+  .sidebar h2 {
+    font-family: "Orbitron", sans-serif; 
+    font-weight: 700; 
+    letter-spacing: .06em;
+    font-size: 1.1rem; 
+    margin: 0; 
+    text-align: center;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    padding-bottom: 12px;
+  }
+
+  .sidebar h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  }
+
+  /* Filtres améliorés */
+  .filters {
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 16px;
+  }
+
+  .field {
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    font-size: .95rem;
+  }
+
+  .field label { 
+    color: var(--text-secondary); 
+    font-weight: 500;
+    font-size: .9rem;
+  }
+
+  .field select {
+    background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.04)); 
+    color: var(--text-primary); 
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 12px; 
+    padding: 12px 14px; 
+    outline: none;
+    font-family: inherit;
+    font-size: .9rem;
+    transition: all .3s ease;
+  }
+
+  .field select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 230, 204, .2);
+    background: rgba(255,255,255,.1);
+  }
+
+  /* Catégories avec hover effects */
+  .category {
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    font-size: .95rem; 
+    cursor: pointer;
+    padding: 14px 16px; 
+    border-radius: 14px;
+    background: linear-gradient(145deg, 
+      rgba(255,255,255,.06), 
+      rgba(255,255,255,.02));
+    border: 1px solid rgba(255,255,255,.1);
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 230, 204, .1), transparent);
+    transition: left .5s ease;
+  }
+
+  .category:hover {
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 25px rgba(0, 230, 204, .15); 
+    border-color: var(--primary);
+    background: linear-gradient(145deg, rgba(0, 230, 204, .1), rgba(123, 104, 238, .05));
+  }
+
+  .category:hover::before {
+    left: 100%;
+  }
+
+  .category input { 
+    accent-color: var(--primary); 
+    width: 18px; 
+    height: 18px; 
+    cursor: pointer;
+    filter: drop-shadow(0 0 5px rgba(0, 230, 204, .3));
+  }
+
+  .category label { 
+    flex: 1; 
+    cursor: pointer; 
+    user-select: none; 
+    font-weight: 500;
+  }
+
+  /* TV avec effets améliorés et reflets réalistes */
+  .tv {
+    position: relative; 
+    width: min(var(--tv-width), calc(100vw - 380px));
+    max-width: 100%; 
+    margin-inline: auto; 
+    aspect-ratio: 1000/700;
+    background: url("./img/tvbackclean.png") center/cover no-repeat;
+    user-select: none;
+    border-radius: 20px; 
+    box-shadow: 
+      0 30px 60px rgba(0, 0, 0, .8), 
+      0 0 0 1px rgba(255, 255, 255, .1),
+      0 0 120px rgba(0, 230, 204, .15);
+    animation: tvGlow 6s ease-in-out infinite alternate;
+    filter: contrast(1.05) brightness(1.02);
+  }
+
+  @keyframes tvGlow {
+    0% { 
+      box-shadow: 
+        0 30px 60px rgba(0, 0, 0, .8), 
+        0 0 120px rgba(0, 230, 204, .15),
+        inset 0 0 50px rgba(0, 230, 204, .05);
+    }
+    100% { 
+      box-shadow: 
+        0 30px 60px rgba(0, 0, 0, .8), 
+        0 0 140px rgba(0, 230, 204, .25),
+        inset 0 0 70px rgba(0, 230, 204, .08);
+    }
+  }
+
+  /* Amélioration des effets de l'écran */
+  .phosphor-glow {
+    background: radial-gradient(ellipse at center,
+      rgba(0, 230, 204, .06) 0%,
+      rgba(0, 255, 213, .04) 40%,
+      rgba(123, 104, 238, .02) 70%,
+      transparent 100%);
+    mix-blend-mode: screen;
+    animation: phosphor 5s ease-in-out infinite alternate;
+    z-index: 38;
+  }
+
+  @keyframes phosphor {
+    0% { opacity: .9; transform: scale(1); }
+    50% { opacity: .6; transform: scale(1.02); }
+    100% { opacity: .8; transform: scale(1); }
+  }
+
+  /* OSD amélioré avec plus d'effets */
+  .osd {
+    position: absolute; 
+    top: 8%; 
+    left: 50%; 
+    transform: translateX(-50%);
+    z-index: 70; 
+    min-width: 240px; 
+    max-width: 85%;
+    padding: 14px 22px; 
+    border-radius: 14px;
+    background: 
+      linear-gradient(145deg, rgba(0, 20, 40, .98), rgba(0, 0, 0, .95)),
+      repeating-linear-gradient(90deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 230, 204, .08) 2px,
+        rgba(0, 230, 204, .08) 4px);
+    color: #9ef5e6; 
+    font-weight: 700; 
+    font-size: 16px; 
+    font-family: 'Orbitron', sans-serif; 
+    letter-spacing: .08em;
+    pointer-events: none; 
+    opacity: 0; 
+    transition: all .4s ease;
+    border: 2px solid rgba(0, 230, 204, .5); 
+    box-shadow: 
+      0 0 25px rgba(0, 230, 204, .4),
+      inset 0 1px 0 rgba(0, 230, 204, .3),
+      inset 0 -1px 0 rgba(0, 230, 204, .2);
+    text-shadow: 0 0 12px rgba(0, 230, 204, .8);
+    backdrop-filter: blur(12px);
+    animation: osdPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes osdPulse {
+    0%, 100% { 
+      border-color: rgba(0, 230, 204, .5);
+      box-shadow: 0 0 25px rgba(0, 230, 204, .4);
+    }
+    50% { 
+      border-color: rgba(0, 230, 204, .7);
+      box-shadow: 0 0 35px rgba(0, 230, 204, .6);
+    }
+  }
+
+  .osd::after {
+    content: ""; 
+    position: absolute; 
+    inset: 0; 
+    border-radius: 14px;
+    background: linear-gradient(120deg,
+      transparent 0 45%,
+      rgba(255,255,255,.12) 48%,
+      rgba(255,255,255,.12) 52%,
+      transparent 55%);
+    background-size: 200% 100%; 
+    animation: osdShine 6s linear infinite; 
+    pointer-events: none;
+  }
+
+  .stencil {
+    position: absolute;
+    inset: 0;
+    background: url("./img/tvback.png") center/cover no-repeat;
+    pointer-events: none;
+    z-index: 50;
+    border-radius: 20px;
+  }
+
+  .screen-wrap { 
+    position: absolute; 
+    left: var(--screen-x); 
+    top: var(--screen-y); 
+    width: var(--screen-w); 
+    height: var(--screen-h); 
+    overflow: hidden; 
+    z-index: 10; 
+    border-radius: 8px;
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, .6);
+  }
+
+  #player, #player iframe { 
+    width: 100%; 
+    height: 100%; 
+    border: 0; 
+    display: block; 
+  }
+
+  /* Logos et masques */
+  .logo-mask-tr, .logo-mask-br {
+    position: absolute; 
+    z-index: 46; 
+    pointer-events: none; 
+    border-radius: 6px;
+    background: radial-gradient(120px 80px at 60% 50%, 
+      rgba(0,0,0,.85) 0%, 
+      rgba(0,0,0,.5) 55%, 
+      rgba(0,0,0,0) 80%);
+    filter: blur(.5px);
+  }
+
+  .logo-mask-tr {
+    right: calc(100% - (var(--screen-x) + var(--screen-w)));
+    top: var(--screen-y); 
+    width: 24%; 
+    height: 22%;
+  }
+
+  .logo-mask-br {
+    right: calc(100% - (var(--screen-x) + var(--screen-w)));
+    top: calc(var(--screen-y) + var(--screen-h) - 22%);
+    width: 26%; 
+    height: 22%;
+  }
+
+  .mouse-blocker { 
+    position: absolute; 
+    left: var(--screen-x); 
+    top: var(--screen-y); 
+    width: var(--screen-w); 
+    height: var(--screen-h); 
+    z-index: 20; 
+    cursor: default; 
+  }
+
+  /* Couches d'effets améliorées */
+  .layer { 
+    position: absolute;
+    left: var(--screen-x);
+    top: var(--screen-y);
+    width: var(--screen-w);
+    height: var(--screen-h);
+    border-radius: 6px;
+    pointer-events: none;
+  }
+
+  .crt-effect {
+    overflow: hidden;
+    z-index: 40;
+  }
+
+  .crt-effect::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg,
+      rgba(0,0,0,0) 0 1px,
+      rgba(0,0,0,.2) 2px 3px);
+    animation: scanlines .08s linear infinite;
+  }
+
+  @keyframes scanlines {
+    to { transform: translateY(3px); }
+  }
+
+  .screen-glare {
+    background: linear-gradient(135deg,
+      rgba(255,255,255,.15) 0%,
+      transparent 30%,
+      transparent 70%,
+      rgba(255,255,255,.08) 100%);
+    mix-blend-mode: soft-light;
+    z-index: 41;
+  }
+
+  .vhs-glitch {
+    background-image: url("./img/vhs-glitch.gif");
+    background-size: cover;
+    opacity: 0;
+    transition: opacity .2s linear;
+    mix-blend-mode: screen;
+    z-index: 39;
+  }
+
+  .off-overlay {
+    background: linear-gradient(45deg, #000 25%, #111 25%, #111 50%, #000 50%, #000 75%, #111 75%);
+    background-size: 4px 4px;
+    opacity: 1;
+    transition: opacity .4s ease-out;
+    z-index: 35;
+  }
+
+  .static {
+    background: url("./img/tvstatic.gif") center/cover no-repeat;
+    opacity: 0;
+    transition: opacity .2s linear;
+    mix-blend-mode: screen;
+    z-index: 36;
+  }
+
+  .scanlines {
+    background-image: linear-gradient(
+      rgba(0,0,0,.05) 50%,
+      rgba(255,255,255,.03) 51%);
+    background-size: 100% 3px;
+    opacity: .35;
+    mix-blend-mode: overlay;
+    z-index: 37;
+  }
+
+  /* Boutons avec feedback amélioré */
+  .btnzone {
+    position: absolute;
+    z-index: 60;
+    cursor: pointer;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+  }
+
+  .btnzone:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 25px rgba(0, 230, 204, .5);
+  }
+
+  .btnzone:active {
+    transform: scale(.85);
+  }
+
+  #powerBtn { left: 58.5%; top: 78.5%; width: 4%; height: 5%; }
+  #chUpBtn { left: 50.2%; top: 79.5%; width: 1.2%; height: 3%; }
+  #chDownBtn { left: 47.8%; top: 79.5%; width: 1.4%; height: 3%; }
+  #volUpBtn { left: 45%; top: 79.5%; width: 1.2%; height: 3%; }
+  #volDownBtn { left: 42.8%; top: 79.5%; width: 1.4%; height: 3%; }
+
+  /* LED de statut améliorée */
+  .status-led {
+    position: absolute;
+    right: 44.9%;
+    top: 80%;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--secondary);
+    box-shadow: 
+      0 0 18px var(--secondary),
+      inset 2px 2px 4px rgba(255,255,255,.3),
+      inset -2px -2px 4px rgba(0,0,0,.3);
+    transition: all .5s ease;
+    z-index: 60;
+  }
+
+  .status-led.on {
+    background: var(--primary);
+    box-shadow: 
+      0 0 30px var(--primary),
+      0 0 60px rgba(0, 230, 204, .4),
+      inset 2px 2px 4px rgba(255,255,255,.5),
+      inset -2px -2px 4px rgba(0,0,0,.2);
+    animation: ledPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes ledPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .6; transform: scale(1.1); }
+  }
+
+  /* Footer */
+  footer { 
+    text-align: center; 
+    padding: 30px 20px; 
+    font-size: .9rem; 
+    color: var(--text-secondary); 
+    opacity: .8;
+    border-top: 1px solid rgba(255,255,255,.1);
+    margin-top: 40px;
+  }
+
+  /* Responsive amélioré pour layout compact */
+  @media (max-width: 1200px) {
+    .main { grid-template-columns: minmax(260px, 32%) 1fr; gap: 18px; }
+    .tv { width: min(var(--tv-width), calc(100vw - 320px)); }
+  }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
+    .sidebar { 
+      order: -1; 
+      position: relative;
+      top: auto;
+      max-height: none;
+      padding: 20px;
+    }
+    .tv { width: 100%; }
+    .filters { grid-template-columns: 1fr; }
+    header { padding: 12px 20px 8px; }
+    .logo { height: clamp(40px, 10vw, 60px); }
+  }
+
+  @media (max-width: 600px) {
+    .main { padding: 12px; }
+    .sidebar { padding: 16px; gap: 16px; }
+    .filters { gap: 12px; }
+    .category { padding: 12px 14px; }
+    header { padding: 10px 16px 6px; }
+  }
+
+  /* Animations d'entrée */
+  .tv {
+    animation: tvSlideIn 1s ease-out both;
+  }
+
+  @keyframes tvSlideIn {
+    from { 
+      opacity: 0; 
+      transform: translateY(50px) scale(0.9); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
+    }
+  }
+
+  /* État de mise sous tension */
+  .tv.powering-on {
+    animation: powerOn 1s ease-out forwards;
+  }
+
+  @keyframes powerOn {
+    0% { filter: brightness(0) contrast(0); }
+    20% { filter: brightness(0.3) contrast(0.5); }
+    50% { filter: brightness(0.7) contrast(0.8); }
+    100% { filter: brightness(1) contrast(1); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-container">
+    <img src="./img/logo2.png" alt="TV Nostalgia DZ" class="logo">
+  </div>
+</header>
+
+<div class="main">
+  <aside class="sidebar" id="sidebar">
+    <h2>Nostalgie Algérienne</h2>
+
+    <div class="filters">
+      <div class="field">
+        <label for="birthYear">Année de naissance</label>
+        <select id="birthYear">
+          <option value="1996" selected>1996</option>
+          <option>1990</option><option>1991</option><option>1992</option><option>1993</option>
+          <option>1994</option><option>1995</option><option>1997</option><option>1998</option>
+          <option>1999</option><option>2000</option><option>2001</option><option>2002</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="yearFilter">Filtrer par année vidéo</label>
+        <select id="yearFilter">
+          <option value="all" selected>Toutes</option>
+        </select>
+      </div>
+    </div>
+
+    <h2>📺 Catégories</h2>
+    <div class="category"><input type="checkbox" id="cat_Comedie" data-cat="Comedie" checked><label for="cat_Comedie">🎭 Comédie (sitcoms, sketchs)</label></div>
+    <div class="category"><input type="checkbox" id="cat_DessinAnime" data-cat="DessinAnime" checked><label for="cat_DessinAnime">🎨 Dessin‑animé (Spacetoon/MBC3)</label></div>
+    <div class="category"><input type="checkbox" id="cat_Sports" data-cat="Sports" checked><label for="cat_Sports">⚽ Sports (génériques, résumés)</label></div>
+    <div class="category"><input type="checkbox" id="cat_News" data-cat="News" checked><label for="cat_News">📰 News (ENTV/Canal Algérie)</label></div>
+    <div class="category"><input type="checkbox" id="cat_Histoire" data-cat="Histoire" checked><label for="cat_Histoire">📚 Histoire (docs DZ/Arabes)</label></div>
+  </aside>
+
+  <div class="tv" id="tv">
+    <div class="screen-wrap" id="screenWrap">
+      <div id="player"></div>
+    </div>
+
+    <div class="mouse-blocker" aria-hidden="true"></div>
+    <div class="layer phosphor-glow" aria-hidden="true"></div>
+    <div class="layer crt-effect" aria-hidden="true"></div>
+    <div class="layer screen-glare" aria-hidden="true"></div>
+    <div class="layer vhs-glitch" id="vhsGlitch" aria-hidden="true"></div>
+    <div class="layer off-overlay" id="offOverlay" aria-hidden="true"></div>
+    <div class="layer static" id="staticOverlay" aria-hidden="true"></div>
+    <div class="layer scanlines" aria-hidden="true"></div>
+
+    <div id="powerBtn"  class="btnzone" title="POWER" aria-label="Power button"></div>
+    <div id="chUpBtn"   class="btnzone" title="CH ▲"   aria-label="Channel up"></div>
+    <div id="chDownBtn" class="btnzone" title="CH ▼"   aria-label="Channel down"></div>
+    <div id="volUpBtn"  class="btnzone" title="VOL +"  aria-label="Volume up"></div>
+    <div id="volDownBtn"class="btnzone" title="VOL -"  aria-label="Volume down"></div>
+
+    <div class="status-led" id="statusLed" aria-hidden="true"></div>
+    <div class="osd" id="osd"></div>
+    <div class="stencil" aria-hidden="true"></div>
+  </div>
+</div>
+
+<footer>
+  © 2025 — TV Nostalgia DZ. Fait avec ❤️ et nostalgie pour l'Algérie.
+</footer>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html><script>
+/* ========= CONFIG ========= */
+// Plus besoin d'API YouTube - Base de données locale de vidéos nostalgiques
+
+/* Catégories */
+const CATEGORIES = ["Comedie","DessinAnime","Sports","News","Histoire"];
+
+/* BASE DE DONNÉES VIDÉOS NOSTALGIQUES - IDs YouTube RÉELS *//* BASE DE DONNÉES VIDÉOS NOSTALGIQUES - IDs YouTube RÉELS */
+const VIDEO_DATABASE = {
+  Comedie: [
+    { id: "ayvMBSfvQOY", title: "Nass Mlah City — S1 Épisode 1", channel: "Nass Mlah City", year: 2002, thumb: "https://img.youtube.com/vi/ayvMBSfvQOY/hqdefault.jpg" },
+    { id: "pd38SIkfieI", title: "Nass Mlah City 3 — L’Épouse étrangère", channel: "Achour/Sultan", year: 2005, thumb: "https://img.youtube.com/vi/pd38SIkfieI/hqdefault.jpg" },
+    { id: "krQ5xB7zER8", title: "Albat7a — Épisode 01 (الشروق)", channel: "Echorouk TV", year: 2023, thumb: "https://img.youtube.com/vi/krQ5xB7zER8/hqdefault.jpg" },
+    { id: "HRxyrfGU73Y", title: "Dar El Jiran — Meilleurs moments", channel: "Archives DZ", year: 2002, thumb: "https://img.youtube.com/vi/HRxyrfGU73Y/hqdefault.jpg" },
+    { id: "qXUp7R-WN4M", title: "Caméra cachée — Mode Avion (EP01)", channel: "DZ News/Pranks", year: 2019, thumb: "https://img.youtube.com/vi/qXUp7R-WN4M/hqdefault.jpg" },
+    { id: "KHwt8oR2kEA", title: "الكاميرا الخفية — القنّاص (الحلقة 2)", channel: "El Heddaf", year: 2024, thumb: "https://img.youtube.com/vi/KHwt8oR2kEA/hqdefault.jpg" },
+    { id: "u1rogtj-cgM", title: "Djemai Family — S1 EP1", channel: "Djemai Family", year: 2003, thumb: "https://img.youtube.com/vi/u1rogtj-cgM/hqdefault.jpg" },
+    { id: "rTpx4YqMCOo", title: "Djemai Family — S1 EP4 (Le Pigeon Voyageur)", channel: "Djemai Family", year: 2003, thumb: "https://img.youtube.com/vi/rTpx4YqMCOo/hqdefault.jpg" },
+    { id: "u8pEfEHwgp4", title: "Edamma — Épisode 01 (ENTV)", channel: "ENTV", year: 2023, thumb: "https://img.youtube.com/vi/u8pEfEHwgp4/hqdefault.jpg" },
+    { id: "Z98zXAr6Yvc", title: "El Fahama — Séquence d’archives", channel: "ENTV Archive", year: 2006, thumb: "https://img.youtube.com/vi/Z98zXAr6Yvc/hqdefault.jpg" }
+  ],
+
+  DessinAnime: [
+    { id: "6pf0L_Szvy4", title: "Adnan wa Lina — Opening (عدنان ولينا)", channel: "Classic Anime", year: 1978, thumb: "https://img.youtube.com/vi/6pf0L_Szvy4/hqdefault.jpg" },
+    { id: "UqLVuJee7uo", title: "Detective Conan — Opening (سبيستون)", channel: "Spacetoon", year: 2000, thumb: "https://img.youtube.com/vi/UqLVuJee7uo/hqdefault.jpg" },
+    { id: "RvS7_l2VcrM", title: "Captain Tsubasa (ماجد) — J2 Opening", channel: "Spacetoon", year: 2001, thumb: "https://img.youtube.com/vi/RvS7_l2VcrM/hqdefault.jpg" },
+    { id: "XbpPeBFFOFc", title: "Pokémon — Opening (رشا رزق)", channel: "Fans/Remaster", year: 2000, thumb: "https://img.youtube.com/vi/XbpPeBFFOFc/hqdefault.jpg" },
+    { id: "1K5M8mSmlCk", title: "Duroob Rimi (دروب ريمي) — Opening", channel: "Spacetoon", year: 1997, thumb: "https://img.youtube.com/vi/1K5M8mSmlCk/hqdefault.jpg" },
+    { id: "jLwlrkha0BA", title: "أبناء توم وجيري — شارة البداية", channel: "Spacetoon", year: 2001, thumb: "https://img.youtube.com/vi/jLwlrkha0BA/hqdefault.jpg" },
+    { id: "ZoI6Fl_EC9g", title: "مغامرات سندباد — شارة البداية", channel: "Classic Cartoons", year: 1975, thumb: "https://img.youtube.com/vi/ZoI6Fl_EC9g/hqdefault.jpg" },
+    { id: "-nILsASOLMo", title: "جزيرة الكنز — Opening (Arabic)", channel: "Takarajima", year: 1978, thumb: "https://img.youtube.com/vi/-nILsASOLMo/hqdefault.jpg" },
+    { id: "GY4rEmG2Rh0", title: "أنا وأخي — شارة البداية", channel: "Spacetoon", year: 1996, thumb: "https://img.youtube.com/vi/GY4rEmG2Rh0/hqdefault.jpg" },
+    { id: "PtZ5RC9rBnc", title: "بحّارة القمر (Sailor Moon) — نسخة عربية (cover)", channel: "Otaku Oasis", year: 1992, thumb: "https://img.youtube.com/vi/PtZ5RC9rBnc/hqdefault.jpg" }
+  ],
+
+  Sports: [
+    { id: "zcgBc04bRmU", title: "Algérie — CAN 2004 (rétro)", channel: "Foot Archive", year: 2004, thumb: "https://img.youtube.com/vi/zcgBc04bRmU/hqdefault.jpg" },
+    { id: "5L59Cx2lQIE", title: "Algérie 2-1 Égypte — CAN 2004", channel: "Retro DZ", year: 2004, thumb: "https://img.youtube.com/vi/5L59Cx2lQIE/hqdefault.jpg" },
+    { id: "GSNNnJ4YHBA", title: "Egypt 1-2 Algeria — AFCON 2004", channel: "AFCON Archive", year: 2004, thumb: "https://img.youtube.com/vi/GSNNnJ4YHBA/hqdefault.jpg" },
+    { id: "IKz_oa01R78", title: "Morocco 3-1 Algeria — CAN 2004", channel: "tangermorocco", year: 2004, thumb: "https://img.youtube.com/vi/IKz_oa01R78/hqdefault.jpg" },
+    { id: "HyC5Kv6_XOE", title: "Zimbabwe 2-1 Algeria — CAN 2004", channel: "AFCON Archive", year: 2004, thumb: "https://img.youtube.com/vi/HyC5Kv6_XOE/hqdefault.jpg" },
+    { id: "Ua0L36xehUA", title: "USMA 3-1 MCA — 2003/2004", channel: "Chouaib Kahoul", year: 2004, thumb: "https://img.youtube.com/vi/Ua0L36xehUA/hqdefault.jpg" },
+    { id: "TgZ4Zz2TEiY", title: "USMA 2-1 ESS — 2003/2004", channel: "Chouaib Kahoul", year: 2004, thumb: "https://img.youtube.com/vi/TgZ4Zz2TEiY/hqdefault.jpg" },
+    { id: "swRiRm7lINw", title: "USMA 3-1 RCK — 2002/2003", channel: "Chouaib Kahoul", year: 2003, thumb: "https://img.youtube.com/vi/swRiRm7lINw/hqdefault.jpg" },
+    { id: "Jge8mfNCbVA", title: "Algérie vs Cameroun — CAN 2004", channel: "Classic Foot", year: 2004, thumb: "https://img.youtube.com/vi/Jge8mfNCbVA/hqdefault.jpg" },
+    { id: "B3oG4CoIvz0", title: "Orlando Pirates vs MC Alger — Highlights", channel: "CAF CL", year: 2021, thumb: "https://img.youtube.com/vi/B3oG4CoIvz0/hqdefault.jpg" }
+  ],
+
+  News: [
+    { id: "6wIkLu4kfSA", title: "ENTV — نشرة الأخبار الثامنة 11/06/2025", channel: "ENTV", year: 2025, thumb: "https://img.youtube.com/vi/6wIkLu4kfSA/hqdefault.jpg" },
+    { id: "5DSz0oGv9q0", title: "ENTV — نشرة الأخبار الثامنة 14/05/2025", channel: "ENTV", year: 2025, thumb: "https://img.youtube.com/vi/5DSz0oGv9q0/hqdefault.jpg" },
+    { id: "eYndqTsaQpg", title: "ENTV — نشرة الأخبار الثامنة 06/02/2025", channel: "ENTV", year: 2025, thumb: "https://img.youtube.com/vi/eYndqTsaQpg/hqdefault.jpg" },
+    { id: "tA-Ep8QQUFs", title: "ENTV — نشرة الأخبار الثامنة 05/07/2025", channel: "ENTV", year: 2025, thumb: "https://img.youtube.com/vi/tA-Ep8QQUFs/hqdefault.jpg" },
+    { id: "nI_BYTMNZXE", title: "ENTV — نشرة الأخبار 26/05/2025", channel: "ENTV", year: 2025, thumb: "https://img.youtube.com/vi/nI_BYTMNZXE/hqdefault.jpg" },
+    { id: "Y91FwqfcesY", title: "الأحوال الجوية في الجزائر — 08/08/2025", channel: "Météo DZ", year: 2025, thumb: "https://img.youtube.com/vi/Y91FwqfcesY/hqdefault.jpg" },
+    { id: "D6_gjusI1nc", title: "النشرة الجوية — 10/07/2025", channel: "ENTV", year: 2025, thumb: "https://img.youtube.com/vi/D6_gjusI1nc/hqdefault.jpg" },
+    { id: "g_5qcogP8C0", title: "ENTV — نشرة الواحدة 07/08/2025", channel: "ENTV", year: 2025, thumb: "https://img.youtube.com/vi/g_5qcogP8C0/hqdefault.jpg" },
+    { id: "J0N0Mo-kcWU", title: "Canal Algérie — Bonjour d'Algérie 14/04/2024", channel: "Canal Algérie", year: 2024, thumb: "https://img.youtube.com/vi/J0N0Mo-kcWU/hqdefault.jpg" },
+    { id: "1ZBlClFlBIc", title: "إشهارات جزائرية قديمة 2001 (Archive TV)", channel: "Archive DZ", year: 2001, thumb: "https://img.youtube.com/vi/1ZBlClFlBIc/hqdefault.jpg" }
+  ],
+
+  Histoire: [
+    { id: "6gEMAkds6PU", title: "Pierre Chaulet — طبيب الثورة الجزائرية (وثائقي ENTV)", channel: "ENTV", year: 2024, thumb: "https://img.youtube.com/vi/6gEMAkds6PU/hqdefault.jpg" },
+    { id: "twd3J5_-91o", title: "تصفية الاستعمار — الجزء 1", channel: "Doc History", year: 2021, thumb: "https://img.youtube.com/vi/twd3J5_-91o/hqdefault.jpg" },
+    { id: "bz4vXcr3lkY", title: "تصفية الاستعمار — الجزء 2", channel: "Doc History", year: 2021, thumb: "https://img.youtube.com/vi/bz4vXcr3lkY/hqdefault.jpg" },
+    { id: "RD5qKR7mloo", title: "French Algeria — A story of love and hate", channel: "Documentaire Société", year: 2019, thumb: "https://img.youtube.com/vi/RD5qKR7mloo/hqdefault.jpg" },
+    { id: "ieY4GB71GdI", title: "Guerre d’Algérie — L’ennemi intime (version longue)", channel: "Docs FR", year: 2018, thumb: "https://img.youtube.com/vi/ieY4GB71GdI/hqdefault.jpg" },
+    { id: "nMSMr5uPY7A", title: "أحمد بن بلة — شاهد على العصر (1)", channel: "Al Jazeera", year: 2016, thumb: "https://img.youtube.com/vi/nMSMr5uPY7A/hqdefault.jpg" },
+    { id: "Y_hYO8A_DMw", title: "إيريكا دوبر زيقلر — صديقة الثورة الجزائرية", channel: "ENTV Drama", year: 2022, thumb: "https://img.youtube.com/vi/Y_hYO8A_DMw/hqdefault.jpg" },
+    { id: "85RWrRmP-YQ", title: "باجي مختار — ثورة وثائر", channel: "ENTV", year: 2022, thumb: "https://img.youtube.com/vi/85RWrRmP-YQ/hqdefault.jpg" },
+    { id: "pUzvc-wqLD0", title: "نقل السلاح من مصر إلى الجزائر (1955)", channel: "ENTV", year: 2016, thumb: "https://img.youtube.com/vi/pUzvc-wqLD0/hqdefault.jpg" },
+    { id: "7idec8DqDq4", title: "أعماق الجزائر — الشرق الوثائقية", channel: "Asharq Documentary", year: 2023, thumb: "https://img.youtube.com/vi/7idec8DqDq4/hqdefault.jpg" }
+  ]
+};
+
+/* Profils par génération (filtrage intelligent selon l'année de naissance) */
+const GENERATION_PREFERENCES = {
+  early90s: {
+    Comedie: [0, 6, 7, 8], // Indices préférés pour cette génération
+    DessinAnime: [1, 9, 2],
+    Sports: [6, 7, 9],
+    News: [5, 7, 6],
+    Histoire: [5, 7, 9]
+  },
+  mid90s: {
+    Comedie: [0, 1, 2, 3],
+    DessinAnime: [0, 1, 2, 4],
+    Sports: [0, 1, 2, 3],
+    News: [0, 1, 3, 4],
+    Histoire: [0, 1, 3, 4]
+  },
+  late90s: {
+    Comedie: [1, 5, 9, 3],
+    DessinAnime: [1, 7, 8, 6],
+    Sports: [1, 8, 9, 4],
+    News: [1, 4, 8, 9],
+    Histoire: [1, 4, 8, 9]
+  }
+};
+
+/* Player */
+const OFFSET_MIN = 10, OFFSET_MAX = 120;
+const CACHE_TTL_MIN = 720; // 12h
+
+/* ========= AUDIO SYSTEM ========= */
+let audioContext = null;
+let tvNoiseAudio = null;
+let tvOnAudio = null;
+let tvOffAudio = null;
+
+function initAudio() {
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Charger les sons
+    tvNoiseAudio = new Audio('./sounds/tv-noise.mp3');
+    tvNoiseAudio.volume = 0.4;
+    tvNoiseAudio.preload = 'auto';
+    
+    tvOnAudio = new Audio('./sounds/tvon.mp3');
+    tvOnAudio.volume = 0.6;
+    tvOnAudio.preload = 'auto';
+    
+    tvOffAudio = new Audio('./sounds/tvoff.mp3');
+    tvOffAudio.volume = 0.5;
+    tvOffAudio.preload = 'auto';
+  } catch (e) {
+    console.log('Audio not supported');
+  }
+}
+
+function playTVNoise() {
+  if (tvNoiseAudio && audioContext && audioContext.state === 'running') {
+    try {
+      tvNoiseAudio.currentTime = 0;
+      const playPromise = tvNoiseAudio.play();
+      if (playPromise) {
+        playPromise.catch(() => {});
+      }
+      // Arrêter après 1 seconde exactement
+      setTimeout(() => {
+        tvNoiseAudio.pause();
+        tvNoiseAudio.currentTime = 0;
+      }, 1000);
+    } catch (e) {}
+  }
+}
+
+function playTVOn() {
+  if (tvOnAudio && audioContext && audioContext.state === 'running') {
+    try {
+      tvOnAudio.currentTime = 0;
+      tvOnAudio.play().catch(() => {});
+    } catch (e) {}
+  }
+}
+
+function playTVOff() {
+  if (tvOffAudio && audioContext && audioContext.state === 'running') {
+    try {
+      tvOffAudio.currentTime = 0;
+      tvOffAudio.play().catch(() => {});
+    } catch (e) {}
+  }
+}
+
+/* ========= STATE ========= */
+let VIDEO_LIBRARY = {}; // {cat: [{id,title,channel,thumb,year}]}
+let aggregatedList = []; // liste d'IDs filtrés par catégories et année
+let currentIndex = 0, player = null, tvOn = false, currentVolume = 50;
+let videosLoaded = false; // Flag pour vérifier si les vidéos sont chargées
+let ytReadyResolve; const ytReady = new Promise(r=>ytReadyResolve=r);
+function onYouTubeIframeAPIReady(){ytReadyResolve();}
+
+/* ========= HELPERS ========= */
+const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+function showOSD(text,ms=1800){const osd=document.getElementById("osd");osd.innerText=text;osd.style.opacity=1;clearTimeout(osd._t);osd._t=setTimeout(()=>osd.style.opacity=0,ms);}
+function updateLED(){document.getElementById("statusLed").classList.toggle("on",tvOn);}
+function extractVideoId(input){
+  if(!input) return null;
+  try{
+    if(/^[\w-]{11,}$/.test(input)) return input;
+    const url = new URL(input);
+    if (url.hostname.includes("youtu.be")) return url.pathname.slice(1);
+    if (url.searchParams.get("v")) return url.searchParams.get("v");
+    const m = url.pathname.match(/\/(shorts|embed)\/([\w-]{11,})/);
+    return m ? m[2] : null;
+  }catch{return null;}
+}
+
+/* ========= PROFILE SELECTION ========= */
+function getCohort(year){
+  const y = Number(year||1996);
+  if (y <= 1992) return "early90s";
+  if (y <= 1996) return "mid90s";
+  return "late90s";
+}
+
+/* ========= CACHE ========= */
+const CACHE_KEY = "tvnostalgia_dz_cache_v5";
+
+function loadCache(){
+  try{
+    const raw = localStorage.getItem(CACHE_KEY);
+    if(!raw) return null;
+    const {ts, data} = JSON.parse(raw);
+    if(!ts || !data) return null;
+    const ageMin = (Date.now()-ts)/60000;
+    if(ageMin > CACHE_TTL_MIN) return null;
+    return data;
+  }catch{return null;}
+}
+
+function saveCache(data){ 
+  try{ 
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ts: Date.now(), data})) 
+  }catch{} 
+}
+
+/* ========= BUILD LIBRARY (SANS API) ========= */
+async function buildVideoLibrary(birthYear){
+  videosLoaded = false;
+  showOSD("📚 Chargement des vidéos...", 1500);
+  
+  const cached = loadCache();
+  if(cached && cached[birthYear]){
+    VIDEO_LIBRARY = cached[birthYear];
+    videosLoaded = true;
+    populateYearFilter();
+    rebuildAggregatedList();
+    showOSD(`✅ ${Object.values(VIDEO_LIBRARY).flat().length} vidéos chargées !`, 1500);
+    return;
+  }
+
+  const cohort = getCohort(birthYear);
+  const preferences = GENERATION_PREFERENCES[cohort];
+
+  VIDEO_LIBRARY = {};
+  
+  for(const cat of CATEGORIES){
+    const allVideos = VIDEO_DATABASE[cat] || [];
+    const preferredIndices = preferences[cat] || [];
+    
+    // Prioriser les vidéos selon les préférences générationnelles
+    const priorityVideos = preferredIndices.map(i => allVideos[i]).filter(v => v);
+    const otherVideos = allVideos.filter((v, i) => !preferredIndices.includes(i));
+    
+    // Mélanger et combiner
+    const categoryList = [...priorityVideos, ...otherVideos];
+    shuffleArray(categoryList);
+    
+    VIDEO_LIBRARY[cat] = categoryList;
+  }
+
+  // Sauver en cache
+  const global = loadCache() || {};
+  global[birthYear] = VIDEO_LIBRARY;
+  saveCache(global);
+  
+  videosLoaded = true;
+  populateYearFilter();
+  rebuildAggregatedList();
+  showOSD(`✅ ${Object.values(VIDEO_LIBRARY).flat().length} vidéos chargées !`, 1500);
+}
+
+/* ========= YEAR FILTER UI ========= */
+function populateYearFilter(){
+  const sel = document.getElementById('yearFilter');
+  const years = new Set();
+  for(const cat of CATEGORIES){
+    for(const v of (VIDEO_LIBRARY[cat]||[])){
+      if(v.year) years.add(v.year);
+    }
+  }
+  const arr = Array.from(years).sort((a,b)=>a-b);
+  sel.innerHTML = '<option value="all" selected>Toutes</option>' + arr.map(y=>`<option value="${y}">${y}</option>`).join('');
+}
+
+/* ========= AGGREGATE ========= */
+function rebuildAggregatedList(){
+  const activeCats = Array.from(document.querySelectorAll('.category input:checked')).map(cb=>cb.dataset.cat);
+  const yearFilter = document.getElementById('yearFilter').value;
+  const ids = [];
+  
+  for(const cat of activeCats){
+    const arr = VIDEO_LIBRARY[cat] || [];
+    for(const v of arr){
+      if(yearFilter === 'all' || String(v.year) === String(yearFilter)){
+        ids.push(v.id);
+      }
+    }
+  }
+  
+  const unique = Array.from(new Set(ids));
+  
+  if(!unique.length){
+    showOSD("🚫 Aucune vidéo (changez l'année/catégories)", 2500);
+    // En dernier recours, prendre quelques vidéos au hasard
+    const allVideos = Object.values(VIDEO_DATABASE).flat();
+    const randomVideos = [];
+    for(let i = 0; i < 10 && i < allVideos.length; i++){
+      const randomVideo = allVideos[Math.floor(Math.random() * allVideos.length)];
+      if(!randomVideos.includes(randomVideo.id)){
+        randomVideos.push(randomVideo.id);
+      }
+    }
+    aggregatedList = randomVideos;
+  } else {
+    aggregatedList = unique;
+  }
+  
+  shuffleArray(aggregatedList);
+  currentIndex = 0;
+}
+
+/* ========= PLAYER + WATCHDOG anti écran noir ========= */
+let playerReady = false;
+let watchdogTimer = null;
+
+async function createOrUpdatePlayer(firstId){
+  if(!player){
+    player = new YT.Player("player",{
+      videoId: firstId || null,
+      playerVars:{
+        autoplay:0, controls:0, modestbranding:1, rel:0, iv_load_policy:3,
+        disablekb:1, playsinline:1, wmode:"opaque", fs:0, origin: location.origin
+      },
+      events:{ onReady:onReady, onStateChange:onStateChange, onError:onPlayerError }
+    });
+  }else{
+    player.loadVideoById({ videoId:firstId, startSeconds: rand(OFFSET_MIN, OFFSET_MAX) });
+  }
+}
+
+function onReady(e){
+  playerReady = true;
+  e.target.setVolume(currentVolume);
+  hideYouTubeUI();
+  try{
+    const doc = e.target.getIframe().contentDocument;
+    if(doc){
+      const obs = new MutationObserver(()=>hideYouTubeUI());
+      obs.observe(doc.documentElement, { childList:true, subtree:true, attributes:true });
+    }
+  }catch{}
+}
+
+function onPlayerError(){
+  showOSD("⚠️ Erreur lecteur — vidéo suivante", 1800);
+  clearWatchdog(); 
+  nextChannel(true);
+}
+
+function startWatchdog(){
+  clearWatchdog();
+  watchdogTimer = setTimeout(()=>{
+    showOSD("⏳ Rechargement…", 1500);
+    nextChannel(true);
+  }, 8000);
+}
+
+function clearWatchdog(){
+  if(watchdogTimer){ clearTimeout(watchdogTimer); watchdogTimer = null; }
+}
+
+function onStateChange(e){
+  if (e.data === YT.PlayerState.PLAYING) {
+    document.getElementById('offOverlay').style.opacity = 0;
+    document.getElementById('tv').classList.remove('powering-on');
+    clearWatchdog();
+  }
+  if (e.data === YT.PlayerState.BUFFERING) {
+    startWatchdog();
+  }
+  if (e.data === YT.PlayerState.ENDED) {
+    nextChannel(true);
+  }
+  setTimeout(hideYouTubeUI, 150);
+  setTimeout(hideYouTubeUI, 800);
+  setTimeout(hideYouTubeUI, 1500);
+}
+
+function hideYouTubeUI(){
+  if(!player||!player.getIframe)return;
+  try{
+    const iframe=player.getIframe();
+    const css=`
+      .ytp-chrome-bottom, .ytp-chrome-top, .ytp-watermark, .ytp-title,
+      .ytp-gradient-bottom, .ytp-gradient-top, .ytp-pause-overlay,
+      .ytp-share-button-visible, .branding-img, .ytp-endscreen-content,
+      .ytp-ce-element, .ytp-cards-teaser, .iv-branding, .annotation,
+      .ytp-show-cards-title, .ytp-videowall-still, .ytp-suggested-action,
+      .ytp-menuitem, .ytp-popup, .ytp-tooltip, .ytp-impression-link,
+      .ytp-title-channel, .ytp-title-expanded-heading, .ytp-title-expanded-content,
+      .ytp-watch-later-icon, .ytp-watch-later-title, .ytp-cards-button,
+      .ytp-info-panel-detail, .ytp-brand-name, .ytp-youtube-button,
+      .ytp-small-mode .ytp-chrome-controls, .ytp-paid-content-overlay,
+      .ytp-remote-display-status, .ytp-multicam, .ytp-player-minimized,
+      .html5-endscreen, .html5-player-chrome, .caption-window {
+        display: none !important; 
+        opacity: 0 !important; 
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+      
+      /* Masquer complètement le player chrome */
+      .html5-video-player .ytp-chrome-bottom {
+        display: none !important;
+      }
+      
+      /* Masquer les overlays et popup */
+      .ytp-chrome-controls, .ytp-progress-bar-container {
+        display: none !important;
+      }
+      
+      /* Force le masquage des éléments YouTube */
+      [class*="ytp-"], [class*="branding"], [class*="annotation"] {
+        display: none !important;
+      }
+    `;
+    const doc=iframe.contentDocument;
+    if(doc&&!doc.getElementById("_hideUI")){
+      const s=doc.createElement("style"); s.id="_hideUI"; s.textContent=css;
+      doc.head.appendChild(s);
+    }
+    
+    // Force le focus sur la vidéo pour éviter les contrôles
+    const video = doc.querySelector('video');
+    if (video) {
+      video.controls = false;
+      video.setAttribute('controls', 'false');
+    }
+  }catch{}
+}
+
+/* ========= CONTROLS ========= */
+function powerToggle(){
+  tvOn = !tvOn;
+  const off = document.getElementById("offOverlay");
+  const tv = document.getElementById("tv");
+  
+  if (tvOn) {
+    playTVOn(); // Son d'allumage
+    tv.classList.add("powering-on");
+    showOSD("⚡ POWER ON — TV Nostalgia DZ", 2000);
+
+    if(!aggregatedList.length){
+      rebuildAggregatedList();
+      if(!aggregatedList.length){
+        // En dernier recours : prendre toutes les vidéos de la base
+        aggregatedList = Object.values(VIDEO_DATABASE).flat().map(v => v.id);
+        shuffleArray(aggregatedList);
+      }
+    }
+    
+    if(aggregatedList.length){
+      currentIndex = rand(0, aggregatedList.length - 1);
+      const videoId = aggregatedList[currentIndex];
+      createOrUpdatePlayer(videoId).then(()=>{
+        try{
+          player.playVideo();
+        }catch{}
+        startWatchdog();
+      });
+    }else{
+      off.style.opacity = 1;
+      showOSD("❌ Pas de vidéos disponibles", 2500);
+    }
+  } else {
+    playTVOff(); // Son d'extinction
+    showOSD("⚫ POWER OFF", 1500);
+    try{ player?.stopVideo(); }catch{}
+    document.getElementById("offOverlay").style.opacity = 1;
+    tv.classList.remove('powering-on');
+    clearWatchdog();
+  }
+  updateLED();
+}
+
+function nextChannel(auto=false){
+  if(!tvOn||!player||!aggregatedList.length) return;
+  showStatic(1000); // 1 seconde exactement
+  showGlitch(1000); // 1 seconde exactement
+  currentIndex=(currentIndex+1)%aggregatedList.length;
+  const v=aggregatedList[currentIndex];
+  setTimeout(()=>{
+    player.loadVideoById({videoId:v,startSeconds:rand(OFFSET_MIN,OFFSET_MAX)});
+    if(auto) startWatchdog();
+    showOSD(`📺 Canal ${currentIndex+1}/${aggregatedList.length}`,1600);
+  },500); // Légèrement plus court que l'effet pour une transition fluide
+}
+
+function prevChannel(){
+  if(!tvOn||!player||!aggregatedList.length) return;
+  showStatic(1000); // 1 seconde exactement
+  showGlitch(1000); // 1 seconde exactement
+  currentIndex=(currentIndex-1+aggregatedList.length)%aggregatedList.length;
+  const v=aggregatedList[currentIndex];
+  setTimeout(()=>{
+    player.loadVideoById({videoId:v,startSeconds:rand(OFFSET_MIN,OFFSET_MAX)});
+    startWatchdog();
+    showOSD(`📺 Canal ${currentIndex+1}/${aggregatedList.length}`,1600);
+  },500); // Légèrement plus court que l'effet pour une transition fluide
+}
+
+function volUp(){
+  if(!tvOn||!player)return;
+  currentVolume=Math.min(100,currentVolume+10);
+  player.setVolume(currentVolume);
+  showOSD(`🔊 VOLUME ${currentVolume}%`,1200);
+}
+
+function volDown(){
+  if(!tvOn||!player)return;
+  currentVolume=Math.max(0,currentVolume-10);
+  player.setVolume(currentVolume);
+  showOSD(`${currentVolume===0?'🔇':'🔉'} VOLUME ${currentVolume}%`,1200);
+}
+
+/* ========= UI LAYERS & EFFECTS ========= */
+function showLayer(id,on){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.style.opacity=on?1:0;
+}
+
+function showStatic(ms=1000){ // 1 seconde par défaut
+  playTVNoise(); // Son de glitch pendant 1 seconde
+  showLayer("staticOverlay",true);
+  setTimeout(()=>showLayer("staticOverlay",false),ms);
+}
+
+function showGlitch(ms=1000){ // 1 seconde par défaut
+  showLayer("vhsGlitch",true);
+  setTimeout(()=>showLayer("vhsGlitch",false),ms);
+}
+
+/* ========= EVENTS ========= */
+function bindUI(){
+  // Initialiser l'audio au premier clic utilisateur
+  document.addEventListener('click', () => {
+    if (!audioContext) {
+      initAudio();
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    }
+  }, { once: true });
+
+  [["powerBtn",powerToggle],["chUpBtn",nextChannel],["chDownBtn",prevChannel],["volUpBtn",volUp],["volDownBtn",volDown]]
+    .forEach(([id,fn])=>{
+      const el=document.getElementById(id);
+      el.addEventListener("click",fn);
+      el.addEventListener("touchstart",e=>{e.preventDefault();fn();},{passive:false});
+    });
+
+  // Raccourcis clavier
+  window.addEventListener("keydown",e=>{
+    if(["p"," "].includes(e.key.toLowerCase())) powerToggle();
+    if(e.key==="ArrowRight") nextChannel(true);
+    if(e.key==="ArrowLeft") prevChannel();
+    if(e.key==="ArrowUp") volUp();
+    if(e.key==="ArrowDown") volDown();
+  });
+
+  // Catégories
+  document.querySelectorAll('.category input').forEach(cb=>cb.addEventListener('change',()=>{
+    rebuildAggregatedList(); 
+    currentIndex=0; 
+    showOSD('✅ Catégories mises à jour',1400);
+    if(tvOn && aggregatedList.length){
+      player.loadVideoById({videoId: aggregatedList[0], startSeconds: rand(OFFSET_MIN,OFFSET_MAX)});
+      startWatchdog();
+    }
+  }));
+
+  // Filtre année
+  document.getElementById('yearFilter').addEventListener('change', ()=>{
+    rebuildAggregatedList(); 
+    currentIndex=0; 
+    showOSD('📅 Filtre année appliqué',1400);
+    if(tvOn && aggregatedList.length){
+      player.loadVideoById({videoId: aggregatedList[0], startSeconds: rand(OFFSET_MIN,OFFSET_MAX)});
+      startWatchdog();
+    }
+  });
+
+  // Profil année de naissance
+  document.getElementById('birthYear').addEventListener('change', async (e)=>{
+    showOSD(`🎂 Chargement profil ${e.target.value}…`, 1800);
+    await buildVideoLibrary(e.target.value);
+    populateYearFilter();
+    rebuildAggregatedList();
+    if(tvOn && aggregatedList.length){
+      player.loadVideoById({videoId: aggregatedList[0], startSeconds: rand(OFFSET_MIN,OFFSET_MAX)});
+      startWatchdog();
+    }
+  });
+}
+
+/* ========= INIT ========= */
+(async function init(){
+  bindUI(); 
+  updateLED();
+  showOSD("🚀 Chargement de TV Nostalgia DZ…", 2000);
+
+  const birth = document.getElementById('birthYear').value || 1996;
+  await buildVideoLibrary(birth);
+  populateYearFilter();
+  rebuildAggregatedList();
+
+  await ytReady;
+  const firstId = aggregatedList[0] || (FALLBACK.Comedie[0] || null);
+  await createOrUpdatePlayer(firstId);
+
+  // Interface YouTube cachée
+  setInterval(()=>tvOn&&hideYouTubeUI(), 2000);
+  
+  showOSD("📺 Prêt ! Appuyez sur POWER", 2500);
+})();
+</script>
